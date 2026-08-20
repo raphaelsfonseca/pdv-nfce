@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notas - PDV NFCe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }</script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="bg-gray-50 font-sans antialiased min-h-screen">
+
+<div th:replace="~{fragments/layout :: sidebar}"></div>
+<div th:replace="~{fragments/layout :: toasts}"></div>
+
+<main class="ml-64 p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
+        <h1 class="text-2xl font-bold text-gray-900">Notas Emitidas</h1>
+        <form method="get" action="/notas" class="flex items-center space-x-3">
+            <input type="datetime-local" name="inicio" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <input type="datetime-local" name="fim" class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors">
+                Filtrar
+            </button>
+        </form>
+    </div>
+
+    <div th:if="${notas != null and !notas.isEmpty()}" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-200">
+                        <th class="text-left px-6 py-3 font-semibold text-gray-600">NFCe #</th>
+                        <th class="text-left px-6 py-3 font-semibold text-gray-600">Data</th>
+                        <th class="text-left px-6 py-3 font-semibold text-gray-600">Cliente</th>
+                        <th class="text-center px-6 py-3 font-semibold text-gray-600">Qtd Itens</th>
+                        <th class="text-right px-6 py-3 font-semibold text-gray-600">Total</th>
+                        <th class="text-left px-6 py-3 font-semibold text-gray-600">Forma Pgto</th>
+                        <th class="text-center px-6 py-3 font-semibold text-gray-600">Status</th>
+                        <th class="text-center px-6 py-3 font-semibold text-gray-600">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    <tr th:each="nota : ${notas}" class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 font-medium text-gray-900" th:text="${nota.numeroNFCe}"></td>
+                        <td class="px-6 py-4 text-gray-600" th:text="${#temporals.format(nota.dataHora, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="px-6 py-4 text-gray-600">
+                            <span th:if="${nota.cliente != null}" th:text="${nota.cliente.nome}"></span>
+                            <span th:if="${nota.cliente == null}" class="text-gray-400">—</span>
+                        </td>
+                        <td class="px-6 py-4 text-center text-gray-600" th:text="${nota.itens.size()}"></td>
+                        <td class="px-6 py-4 text-right font-medium text-gray-900" th:text="'R$ ' + ${#numbers.formatDecimal(nota.valorTotal, 1, 2)}"></td>
+                        <td class="px-6 py-4 text-gray-600" th:text="${nota.tipoPagamento}"></td>
+                        <td class="px-6 py-4 text-center">
+                            <span th:if="${nota.status.name() == 'FECHADO'}"
+                                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                FECHADO
+                            </span>
+                            <span th:if="${nota.status.name() == 'CANCELADO'}"
+                                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                CANCELADO
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-center space-x-2">
+                            <a th:href="@{/notas/{id}(id=${nota.id})}"
+                               class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg text-xs font-medium hover:bg-indigo-100 transition-colors">
+                                <i data-lucide="eye" class="w-3.5 h-3.5 mr-1"></i> Visualizar
+                            </a>
+                            <a th:href="@{/notas/{id}/imprimir(id=${nota.id})}"
+                               class="inline-flex items-center px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-100 transition-colors">
+                                <i data-lucide="printer" class="w-3.5 h-3.5 mr-1"></i> Imprimir
+                            </a>
+                            <form th:action="@{/notas/{id}/deletar(id=${nota.id})}" method="POST" class="inline"
+                                  onsubmit="return confirm('Tem certeza que deseja excluir esta nota? Esta ação não pode ser desfeita.')">
+                                <button type="submit"
+                                        class="inline-flex items-center px-3 py-1.5 bg-rose-50 text-rose-700 rounded-lg text-xs font-medium hover:bg-rose-100 transition-colors">
+                                    <i data-lucide="trash-2" class="w-3.5 h-3.5 mr-1"></i> Excluir
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:if="${notas == null or notas.isEmpty()}" class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="file-text" class="w-8 h-8 text-gray-400"></i>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-1">Nenhuma nota encontrada</h3>
+            <p class="text-sm text-gray-500">Não há notas emitidas para o período selecionado.</p>
+        </div>
+    </div>
+</main>
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="/js/app.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

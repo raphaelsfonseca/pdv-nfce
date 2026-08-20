@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+
+<!-- SIDEBAR FRAGMENT -->
+<nav th:fragment="sidebar" x-data="{ open: true, mobileOpen: false }"
+     class="fixed top-0 left-0 z-40 h-screen transition-all duration-300"
+     :class="open ? 'w-64' : 'w-20'">
+
+    <!-- Mobile overlay -->
+    <div x-show="mobileOpen" x-on:click="mobileOpen = false"
+         class="fixed inset-0 bg-black/50 z-30 lg:hidden" x-transition.opacity></div>
+
+    <!-- Sidebar -->
+    <div class="h-full bg-gray-900 text-white flex flex-col transition-all duration-300"
+         :class="open ? 'w-64' : 'w-20'"
+         x-show="open || window.innerWidth < 1024"
+         x-bind:class="mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
+
+        <!-- Logo -->
+        <div class="flex items-center justify-between h-16 px-4 border-b border-gray-800">
+            <a href="/" class="flex items-center space-x-3">
+                <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center">
+                    <i data-lucide="credit-card" class="w-5 h-5"></i>
+                </div>
+                <span x-show="open" x-transition class="text-lg font-bold tracking-tight" x-cloak>PDV NFCe</span>
+            </a>
+            <button x-on:click="open = !open" class="hidden lg:block text-gray-400 hover:text-white transition-colors">
+                <i data-lucide="panel-left-close" class="w-5 h-5" x-show="open"></i>
+                <i data-lucide="panel-left-open" class="w-5 h-5" x-show="!open"></i>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+            <a href="/" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.equals(currentPath, '/') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="layout-dashboard" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition x-cloak class="ml-3 text-sm font-medium">Dashboard</span>
+            </a>
+
+            <a href="/pdv" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.startsWith(currentPath, '/pdv') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="shopping-cart" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition class="ml-3 text-sm font-medium">PDV</span>
+            </a>
+
+            <a href="/produtos" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.startsWith(currentPath, '/produtos') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="package" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition class="ml-3 text-sm font-medium">Produtos</span>
+            </a>
+
+            <a href="/clientes" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.startsWith(currentPath, '/clientes') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="users" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition class="ml-3 text-sm font-medium">Clientes</span>
+            </a>
+
+            <a href="/mesas" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.startsWith(currentPath, '/mesas') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="table" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition class="ml-3 text-sm font-medium">Mesas</span>
+            </a>
+
+            <a href="/notas" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.startsWith(currentPath, '/notas') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="file-text" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition class="ml-3 text-sm font-medium">Notas</span>
+            </a>
+
+            <a href="/financeiro" class="flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 group"
+               th:classappend="${#strings.startsWith(currentPath, '/financeiro') ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-gray-400 hover:bg-gray-800 hover:text-white'}">
+                <i data-lucide="wallet" class="w-5 h-5 flex-shrink-0"></i>
+                <span x-show="open" x-transition class="ml-3 text-sm font-medium">Financeiro</span>
+            </a>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-gray-800 p-4">
+            <div x-show="open" x-transition class="text-xs text-gray-500 text-center">
+                PDV NFCe v1.0
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- TOAST NOTIFICATIONS FRAGMENT -->
+<div th:fragment="toasts" x-data="toastManager()" x-init="init()">
+    <!-- Success Toast -->
+    <div x-show="showSuccess" x-transition:enter="transform transition ease-out duration-300"
+         x-transition:enter-start="translate-x-full opacity-0"
+         x-transition:enter-end="translate-x-0 opacity-100"
+         x-transition:leave="transform transition ease-in duration-200"
+         x-transition:leave-start="translate-x-0 opacity-100"
+         x-transition:leave-end="translate-x-full opacity-0"
+         x-on:click="showSuccess = false"
+         class="fixed top-4 right-4 z-50 max-w-sm bg-emerald-50 border border-emerald-200 rounded-xl shadow-2xl shadow-emerald-500/10 p-4 cursor-pointer">
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0 w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-emerald-800" x-text="successMsg">Sucesso</p>
+            </div>
+            <button class="text-emerald-400 hover:text-emerald-600">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <div x-show="showError" x-transition:enter="transform transition ease-out duration-300"
+         x-transition:enter-start="translate-x-full opacity-0"
+         x-transition:enter-end="translate-x-0 opacity-100"
+         x-transition:leave="transform transition ease-in duration-200"
+         x-transition:leave-start="translate-x-0 opacity-100"
+         x-transition:leave-end="translate-x-full opacity-0"
+         x-on:click="showError = false"
+         class="fixed top-4 right-4 z-50 max-w-sm bg-rose-50 border border-rose-200 rounded-xl shadow-2xl shadow-rose-500/10 p-4 cursor-pointer"
+         style="top: 4.5rem;">
+        <div class="flex items-center space-x-3">
+            <div class="flex-shrink-0 w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center">
+                <i data-lucide="alert-circle" class="w-4 h-4 text-rose-600"></i>
+            </div>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-rose-800" x-text="errorMsg">Erro</p>
+            </div>
+            <button class="text-rose-400 hover:text-rose-600">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+</html>

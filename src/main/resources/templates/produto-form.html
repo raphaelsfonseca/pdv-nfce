@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${produto != null and produto.id != null ? 'Editar Produto' : 'Novo Produto'} + ' - PDV NFCe'">Produto - PDV NFCe</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+    <div th:if="${sucesso}" data-success-message="${sucesso}" hidden></div>
+    <div th:if="${erro}" data-error-message="${erro}" hidden></div>
+
+    <div th:replace="~{fragments/layout :: sidebar}"></div>
+    <div th:replace="~{fragments/layout :: toasts}"></div>
+
+    <div class="ml-0 lg:ml-64 transition-all duration-300">
+        <div class="p-6 lg:p-8 max-w-4xl">
+
+            <div class="flex items-center space-x-3 mb-8">
+                <a href="/produtos" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-200 rounded-lg transition-all">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                </a>
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900"
+                        th:text="${produto != null and produto.id != null ? 'Editar Produto' : 'Novo Produto'}">Produto</h1>
+                    <p class="text-sm text-gray-500 mt-0.5">Preencha os dados do produto</p>
+                </div>
+            </div>
+
+            <form th:action="@{/produtos/salvar}" th:object="${produto}" method="POST">
+
+                <input type="hidden" th:field="*{id}" th:if="${produto != null and produto.id != null}">
+
+                <!-- Dados Gerais -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                        <i data-lucide="info" class="w-5 h-5 text-indigo-500"></i>
+                        <span>Dados Gerais</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Nome *</label>
+                            <input type="text" th:field="*{nome}"
+                                   class="w-full px-4 py-2.5 border rounded-xl text-sm"
+                                   th:classappend="${#fields.hasErrors('nome')} ? 'border-red-300 focus:border-red-500' : 'border-gray-200'"
+                                   placeholder="Nome do produto">
+                            <p class="mt-1 text-xs text-red-500" th:if="${#fields.hasErrors('nome')}" th:errors="*{nome}">Erro</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Descricao</label>
+                            <textarea th:field="*{descricao}" rows="3"
+                                      class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-indigo-500"
+                                      placeholder="Descricao detalhada do produto"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Categoria</label>
+                            <input type="text" th:field="*{categoria}"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-indigo-500"
+                                   placeholder="Ex: Bebidas, Alimentos...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Precos -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                        <i data-lucide="dollar-sign" class="w-5 h-5 text-indigo-500"></i>
+                        <span>Precos</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Preco de Custo (R$) *</label>
+                            <input type="number" step="0.01" min="0" th:field="*{precoCusto}"
+                                   class="w-full px-4 py-2.5 border rounded-xl text-sm"
+                                   th:classappend="${#fields.hasErrors('precoCusto')} ? 'border-red-300' : 'border-gray-200'"
+                                   placeholder="0,00">
+                            <p class="mt-1 text-xs text-red-500" th:if="${#fields.hasErrors('precoCusto')}" th:errors="*{precoCusto}">Erro</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Preco de Venda (R$) *</label>
+                            <input type="number" step="0.01" min="0" th:field="*{precoVenda}"
+                                   class="w-full px-4 py-2.5 border rounded-xl text-sm"
+                                   th:classappend="${#fields.hasErrors('precoVenda')} ? 'border-red-300' : 'border-gray-200'"
+                                   placeholder="0,00">
+                            <p class="mt-1 text-xs text-red-500" th:if="${#fields.hasErrors('precoVenda')}" th:errors="*{precoVenda}">Erro</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estoque -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                        <i data-lucide="box" class="w-5 h-5 text-indigo-500"></i>
+                        <span>Estoque</span>
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Estoque Atual</label>
+                            <input type="number" min="0" th:field="*{estoqueAtual}"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-indigo-500"
+                                   placeholder="0">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1.5">Estoque Minimo</label>
+                            <input type="number" min="0" th:field="*{estoqueMinimo}"
+                                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:border-indigo-500"
+                                   placeholder="0">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex items-center justify-end space-x-3">
+                    <a href="/produtos"
+                       class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-medium transition-colors">
+                        Cancelar
+                    </a>
+                    <button type="submit"
+                            class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-600/25">
+                        <span th:text="${produto != null and produto.id != null ? 'Salvar Alteracoes' : 'Cadastrar Produto'}">Salvar</span>
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script th:src="@{/js/app.js}"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>
